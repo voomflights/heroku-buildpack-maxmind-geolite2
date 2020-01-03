@@ -56,20 +56,21 @@ if [ ! -f $DB ]; then
     curl -o $CHECKSUM_FILE -L "$url.md5"
   fi
 
+  calculated_checksum=`openssl md5 $ARCHIVE | egrep -o '([a-f0-9]+)$'`
+  expected_checksum=`cat $CHECKSUM_FILE`
+
+  if [ $calculated_checksum != $expected_checksum ]; then
+    echo "-----> Invalid checksum: expected $expected_checksum, got $calculated_checksum."
+
+    exit 1
+  fi
+
   echo "-----> $MAXMIND_FULL_DB_NAME: Extracting $ARCHIVE"
 
   gunzip $ARCHIVE
 
   echo "-----> $MAXMIND_FULL_DB_NAME: Comparing checksums"
 
-  calculated_checksum=`openssl md5 $DB | egrep -o '([a-f0-9]+)$'`
-  expected_checksum=`cat $CHECKSUM_FILE`
-
-  if [ $calculated_checksum != $expected_checksum ]; then
-    echo "-----> Invalid checksum: expected $expected_checksum, got $calculated_checksum."
-
-#    exit 1
-  fi
 
   touch $LAST
 else
